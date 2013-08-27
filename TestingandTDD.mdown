@@ -93,7 +93,7 @@ You can call the specs by just calling 'rspec' in the terminal.  This will run a
 
 ####What is the difference between a unit test and an integration test?####
 
-Sometimes is easier to understand a concept with an analogy and Atul Kumar Mishra wrote a great one on Quora
+Sometimes is easier to understand a concept with an analogy and Atul Kumar Mishra wrote a great one on [Quora](https://www.quora.com/What-is-the-difference-between-unit-testing-functional-testing-and-integration-testing)
 
 >Imagine you have a cycle which has three major modules
 >
@@ -109,4 +109,4 @@ Think of a class or a method that doesnt need a lot of interaction with other me
 
 __Integration Test__
 
-Think of the whole system or specific grup of processes working together to achieve a goal. Integration test may include the interaction between the front end and the back end of the application; Capybara is a great tool for doing that.
+Think of the whole system or specific grup of processes working together to achieve a goal. Integration test may include the interaction between the front end and the back end of the application; [Capybara](https://github.com/jnicklas/capybara) is a great tool for doing that.
