@@ -1,0 +1,112 @@
+Testing and TDD
+===============
+
+####How do I use rspec instead of the default testing framework that comes with Rails?####
+#####Plus some other nice tools to include#####
+
+Just include them in your Gemfile. You can also add some other testing helpers like factory_girl_rails, faker, capybara, etc.  You want to only include these gems in certain environments (they just take up space and slow down your app if included in production).
+
+If you are going to use RSpec as your testing framework in your rails app, when you create a new rails app, add the --skip-test-unit flag.  So you'd create the rails app with 'rails new <app_name> --skip-test-unit'.  This skips creating all the test/unit files and directories that come standard in rails.  You'll replace them with rspec files and directories later.  
+
+Here is how you will modify your gemfile if you want to use rspec, factory_girl, spork, capybara, jasmine, and guard.  We'll tell you why you'd use them in a minute.
+
+    group :test, :development do
+      gem 'rspec-rails'
+      gem 'factory_girl'
+      gem 'spork-rails', github: 'sporkrb/spork-rails'
+      gem 'jasmine'
+    end
+    
+    group :development do
+      gem 'guard-rspec'
+      gem 'guard-spork'
+    end
+    
+    group :test do
+      gem 'capybara'
+    end
+
+
+- Factory Girl allows you to quickly and easily create test objects of your models to use in your tests, including associations, etc.
+- Spork speeds up your tests by only loading the test environment only once and saving this information in processes instead of loading the environment each time you run the tests. Really useful when used with Guard.
+- Guard makes automated testing easier by running your tests each time it detects a change in your spec files.  It can also be configured to run anytime it detects a change in the files that a spec file tests, like running the user_spec when the user.rb file is changed.  It only runs the specs for the files changed.
+- Jasmine tests your javascript and jquery (with jasmine-jquery).
+- Some good Javascript/JQuery testing gems to use with Jasmine are: Jasmine-fixtures, Jasmine-jquery, Sinon
+- Capybara is your integration test framework.  It allows you to imitatate how a user would interact with your website in the browser (clicks, submits, visiting pages, etc).
+
+So you have your gems installed, now create your rspec /spec folder with 'rails generate rspec:install'.
+
+You'll also need to run 'guard init rspec' in the terminal to create a .guard file, and 'spork rspec --bootstrap' to bootstrap your test helper file.
+
+
+You can check which databases each environment is/will be using in the config/database.yml file. To create all the necessary databases execute the following from the command line:
+$ rake db:create:all
+
+
+####How do I test common features of ActiveRecord models? Validations? Associations? Callbacks?####
+
+Start by creating file for the model spec like spec/models/_spec.rb. Suppose you made a spec for a model called Contact, from now on, you can run that specific spec by entering the following into the command line:
+
+$ rspec spec/models/contact_spec.rb
+
+A good idea is to use factories for test data. Assuming you have put FactoryGirl in your gemfile, you can use it to specify the value of various attributes for the test data of an instance of a particular model. Details on how to do this is available in the next FAQ.
+
+Validations
+Let's skip to testing validations. Using the .build method Factory Girl offers us, we can change the value on a particular attribute for a factory specified earlier to a value that should not be valid. rsFor example, if we have defined a Contact factory, for a contact model, like so:
+
+FactoryGirl.define do
+factory :contact do |f|
+f.firstname "John"
+f.lastname "Doe"
+end
+end
+
+We can test the validation for the presence of a first name, by setting the first name to nil like so:
+
+it "is invalid without a firstname" do
+Factory.build(:contact, first name: nil).should_not be_valid
+end
+
+Association
+The shoulda gem makes testing associations very easy. Suppose there is a one to many relationship between Dog and Owner, and a many to many relationship between Dog and Flea, through a Park join table. To test this,
+
+describe Dog do 
+it { should belong_to (:owner) }
+it { should have_many(:fleas).through(:parks) }
+end
+
+####How do I populate my test database with seed data?####
+
+Create factories with FactoryGirl (good documentation here: https://github.com/thoughtbot/factory_girl/blob/master/GETTING_STARTED.md) and call those factories in your tests.  So if I wanted to create a user, after I built the factory I could just call to FactoryGirl.create(:user) and I'd have a user object to use in testing.  I can also override the defaults passed in to the factory by providing the information like FactoryGirl.create(:user, first_name: 'Steve')
+
+####How do I call run the specs?  How do I read the data provided?####
+
+You can call the specs by just calling 'rspec' in the terminal.  This will run all the specs.  You can get more specific by calling a specific spec_file, like 'rspec spec/some_spec.rb' and even a specific describe block (with additional syntax in tests).  Your tests should be testing ONLY ONE THING, so when you see a red failure, you can find the test that's red and know exactly where your code broke.  Red means failed, Green dots mean passing.  
+
+####What makes a good test? What makes a bad test?####
+
+- **Good tests, test the actual functionality of the method rather that just if a method exists**. Sometimes people will concentrate on incrementing test coverage by hitting every single method of every single class with a test, but that doesn't mean that they are testing for anything useful.
+
+- **Good tests cover edge cases**, you dont just want to cover the common cases, you want to make sure that your application will perform flawlessly always.
+
+- **Good tests are DRY**, Tests are still code, and you want to avoid repetition to make them simpler to maintain. If you realize you are writing the same thing more than once, use before blocks on Rspec to perform any preparation of the environment for your tests.
+
+####What is the difference between a unit test and an integration test?####
+
+Sometimes is easier to understand a concept with an analogy and Atul Kumar Mishra wrote a great one on Quora
+
+>Imagine you have a cycle which has three major modules
+>
+>1. The Braking Module consisting of units - Brake handles, Brake Wire, Brake Shoe
+>2. The Pedaling Module consisting of units - Pedals, Pedal chain, Gears, wheels, crank wheels etc.
+>3. The Body Module consisting of units - seat, handles, frame etc.
+>
+>Unit testing would be testing units in isolation. Eg. Check Brake wire for sturdiness. Integration testing will be combining the units of a module and testing in accordance with each other. Eg. Check When Brake Handles are pushed, Brake wires are stretched proportionately. And finally System Testing will be combining all modules together and testing on real surface. Eg. On a Tar road, while the pedaling speed in 100 RPM, if We apply brakes, the brake wire should be pulled and Cycle should stop within 1.5 meters.
+
+__Unit Test__
+
+Think of a class or a method that doesnt need a lot of interaction with other methods to perform its functionality.
+
+__Integration Test__
+
+Think of the whole system or specific grup of processes working together to achieve a goal. Integration test may include the interaction between the front end and the back end of the application; Capybara is a great tool for doing that.
