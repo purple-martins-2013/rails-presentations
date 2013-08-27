@@ -4,12 +4,14 @@
 
 #### In Rails:
 ```erb
+<%= link_to "My Blog", posts_path %>
+``` 
+Or: 
+```erb
 <%= link_to "My Blog", controller: "posts" %>
 ```
-Or:
-```erb
-<%= link_to "My Blog", posts_path %>
-```    
+But do not use the second method at DBC.
+
 The hyperlink displays “My blog” and takes you to `/posts` and the specific route is shown by running ‘rake routes’ in terminal.
 #### In HTML:
 ```html
